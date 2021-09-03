@@ -29,7 +29,7 @@ import static org.junit.Assert.*;
 /**
  * Unit tests for CoffeeMaker class.
  * 
- * @author Sarah Heckman
+ * @author Panida Ounnaitham
  */
 public class CoffeeMakerTest {
 	
@@ -104,6 +104,8 @@ public class CoffeeMakerTest {
 	public void testAddInventory() throws InventoryException {
 		coffeeMaker.addInventory("4","7","0","9");
 		coffeeMaker.addInventory("4","7","5","9");
+		coffeeMaker.addInventory("-4","-7","-5","-9");
+		coffeeMaker.addInventory("four","seven","five","nine");
 	}
 	
 	/**
@@ -349,7 +351,7 @@ public class CoffeeMakerTest {
 	 * 		to a positive integer.
 	 */
 	@Test
-	public void testCheckInventoryChocWhenUse() throws InventoryException, RecipeException {
+	public void testCheckInventoryChocWhenUse() throws  RecipeException {
 		Recipe recipe5 = new Recipe();
 		recipe5.setName("Coffee");
 		recipe5.setAmtChocolate("4");
@@ -387,5 +389,96 @@ public class CoffeeMakerTest {
 		int change = coffeeMaker.makeCoffee(0, 50);
 		assertEquals(0,change);
 	}
+
+	/**
+	 * Test change when recipe is null
+	 */
+	@Test
+	public void testPurchaseBeverageWithNullRecipe() {
+		int change = coffeeMaker.makeCoffee(0, 50);
+		assertEquals(50,change);
+	}
+
+	/**
+	 * Test change when ingredient not enough
+	 */
+	@Test
+	public void testPurchaseBeverageWithIngredientNotEnough() throws  RecipeException{
+		Recipe recipe5 = new Recipe();
+		recipe5.setName("Coffee");
+		recipe5.setAmtChocolate("40");
+		recipe5.setAmtCoffee("20");
+		recipe5.setAmtMilk("30");
+		recipe5.setAmtSugar("30");
+		recipe5.setPrice("5");
+		coffeeMaker.addRecipe(recipe5);
+		int change = coffeeMaker.makeCoffee(0, 5);
+		assertEquals(5,change);
+	}
+
+//	/**
+//	 * Test inventory when coffee is added by negative number
+//	 */
+//	@Test
+//	public void testAddInventoryCoffeeWithNegativeNum() throws InventoryException {
+//		coffeeMaker.addInventory("-4","2","2","2");
+//	}
+//
+//	/**
+//	 * Test inventory when coffee is added by string
+//	 */
+//	@Test
+//	public void testAddInventoryCoffeeWithString() throws InventoryException {
+//		coffeeMaker.addInventory("four","7","5","9");
+//	}
+//
+//	/**
+//	 * Test inventory when milk is added by negative number
+//	 */
+//	@Test
+//	public void testAddInventoryMilkWithNegativeNum() throws InventoryException {
+//		coffeeMaker.addInventory("2","-4","2","2");
+//	}
+//
+//	/**
+//	 * Test inventory when milk is added by string
+//	 */
+//	@Test
+//	public void testAddInventoryMilkWithString() throws InventoryException {
+//		coffeeMaker.addInventory("4","seven","5","9");
+//	}
+//
+//	/**
+//	 * Test inventory when sugar is added by negative number
+//	 */
+//	@Test
+//	public void testAddInventorySugarWithNegativeNum() throws InventoryException {
+//		coffeeMaker.addInventory("2","2","-4","2");
+//	}
+//
+//	/**
+//	 * Test inventory when sugar is added by string
+//	 */
+//	@Test
+//	public void testAddInventorySugarWithString() throws InventoryException {
+//		coffeeMaker.addInventory("4","7","five","9");
+//	}
+//
+//	/**
+//	 * Test inventory when chocolate is added by negative number
+//	 */
+//	@Test
+//	public void testAddInventoryChocWithNegativeNum() throws InventoryException {
+//		coffeeMaker.addInventory("2","2","0","-4");
+//	}
+//
+//	/**
+//	 * Test inventory when chocolate is added by string
+//	 */
+//	@Test
+//	public void testAddInventoryChocWithString() throws InventoryException {
+//		coffeeMaker.addInventory("4","7","0","nine");
+//	}
+
 
 }
