@@ -23,7 +23,7 @@ import org.junit.Test;
 
 import edu.ncsu.csc326.coffeemaker.exceptions.InventoryException;
 import edu.ncsu.csc326.coffeemaker.exceptions.RecipeException;
-
+import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
 /**
@@ -37,12 +37,17 @@ public class CoffeeMakerTest {
 	 * The object under test.
 	 */
 	private CoffeeMaker coffeeMaker;
+	private CoffeeMaker MockCoffeeMaker;
+	private RecipeBook MockRecipeBook;
+	private Recipe[] ListOfRecipe;
+	private Recipe[] NullListOfRecipe;
 	
 	// Sample recipes to use in testing.
 	private Recipe recipe1;
 	private Recipe recipe2;
 	private Recipe recipe3;
 	private Recipe recipe4;
+	private Recipe recipe6;
 
 	/**
 	 * Initializes some recipes to test with and the {@link CoffeeMaker} 
@@ -54,7 +59,9 @@ public class CoffeeMakerTest {
 	@Before
 	public void setUp() throws RecipeException {
 		coffeeMaker = new CoffeeMaker();
-		
+		MockRecipeBook = mock(RecipeBook.class);
+		MockCoffeeMaker = new CoffeeMaker(MockRecipeBook,new Inventory());
+
 		//Set up for r1
 		recipe1 = new Recipe();
 		recipe1.setName("Coffee");
@@ -90,6 +97,17 @@ public class CoffeeMakerTest {
 		recipe4.setAmtMilk("1");
 		recipe4.setAmtSugar("1");
 		recipe4.setPrice("65");
+
+		recipe6 = new Recipe();
+		recipe6.setName("Coffee");
+		recipe6.setAmtChocolate("40");
+		recipe6.setAmtCoffee("20");
+		recipe6.setAmtMilk("30");
+		recipe6.setAmtSugar("30");
+		recipe6.setPrice("5");
+
+		ListOfRecipe = new Recipe[]{recipe1,recipe2,recipe3,recipe4,recipe6};
+		NullListOfRecipe = new Recipe[]{null};
 	}
 
 	/**
@@ -382,6 +400,7 @@ public class CoffeeMakerTest {
 
 	/**
 	 * Test change when price of coffee equal to amount.
+	 * Then it will return change correct and ingredient will decrease.
 	 */
 	@Test
 	public void testPurchaseBeveragePriceEqualAmt() {
@@ -416,69 +435,54 @@ public class CoffeeMakerTest {
 		assertEquals(5,change);
 	}
 
-//	/**
-//	 * Test inventory when coffee is added by negative number
-//	 */
-//	@Test
-//	public void testAddInventoryCoffeeWithNegativeNum() throws InventoryException {
-//		coffeeMaker.addInventory("-4","2","2","2");
-//	}
-//
-//	/**
-//	 * Test inventory when coffee is added by string
-//	 */
-//	@Test
-//	public void testAddInventoryCoffeeWithString() throws InventoryException {
-//		coffeeMaker.addInventory("four","7","5","9");
-//	}
-//
-//	/**
-//	 * Test inventory when milk is added by negative number
-//	 */
-//	@Test
-//	public void testAddInventoryMilkWithNegativeNum() throws InventoryException {
-//		coffeeMaker.addInventory("2","-4","2","2");
-//	}
-//
-//	/**
-//	 * Test inventory when milk is added by string
-//	 */
-//	@Test
-//	public void testAddInventoryMilkWithString() throws InventoryException {
-//		coffeeMaker.addInventory("4","seven","5","9");
-//	}
-//
-//	/**
-//	 * Test inventory when sugar is added by negative number
-//	 */
-//	@Test
-//	public void testAddInventorySugarWithNegativeNum() throws InventoryException {
-//		coffeeMaker.addInventory("2","2","-4","2");
-//	}
-//
-//	/**
-//	 * Test inventory when sugar is added by string
-//	 */
-//	@Test
-//	public void testAddInventorySugarWithString() throws InventoryException {
-//		coffeeMaker.addInventory("4","7","five","9");
-//	}
-//
-//	/**
-//	 * Test inventory when chocolate is added by negative number
-//	 */
-//	@Test
-//	public void testAddInventoryChocWithNegativeNum() throws InventoryException {
-//		coffeeMaker.addInventory("2","2","0","-4");
-//	}
-//
-//	/**
-//	 * Test inventory when chocolate is added by string
-//	 */
-//	@Test
-//	public void testAddInventoryChocWithString() throws InventoryException {
-//		coffeeMaker.addInventory("4","7","0","nine");
-//	}
+	/**
+	 * Test change when price of coffee more than amount by using mock of recipe and mock coffee.
+	 * Then it will return change equal to amount and check inventory will equal to initially.
+	 */
+	@Test
+	public void testMockPurchaseBeveragePriceMoreThanAmt() {
+		when(MockRecipeBook.getRecipes()).thenReturn(ListOfRecipe);
+		int change = MockCoffeeMaker.makeCoffee(0, 40);
+		assertEquals(40,change);
+		String expectedInventoryString = "Coffee: 15\nMilk: 15\nSugar: 15\nChocolate: 15\n";
+		String check = MockCoffeeMaker.checkInventory();
+		assertEquals(expectedInventoryString,check);
+		verify(MockRecipeBook, atLeastOnce()).getRecipes();
+	}
+
+	/**
+	 * Test change when price of coffee equal to amount by using mock of recipe and mock coffee.
+	 */
+	@Test
+	public void testMockPurchaseBeveragePriceEqualAmt() {
+		when(MockRecipeBook.getRecipes()).thenReturn(ListOfRecipe);
+		int change = MockCoffeeMaker.makeCoffee(0, 50);
+		assertEquals(0,change);
+		verify(MockRecipeBook, times(4)).getRecipes();
+	}
+
+	/**
+	 * Test change when recipe is null by using mock of recipe and mock coffee
+	 */
+	@Test
+	public void testMockPurchaseBeverageWithNullRecipe() {
+		when(MockRecipeBook.getRecipes()).thenReturn(NullListOfRecipe);
+		int change = MockCoffeeMaker.makeCoffee(0, 50);
+		assertEquals(50,change);
+		verify(MockRecipeBook, atMostOnce()).getRecipes();
+	}
+
+	/**
+	 * Test change when ingredient not enough by using mock of recipe and mock coffee
+	 */
+	@Test
+	public void testMockPurchaseBeverageWithIngredientNotEnough() throws  RecipeException{
+		when(MockRecipeBook.getRecipes()).thenReturn(ListOfRecipe);
+		int change = MockCoffeeMaker.makeCoffee(4, 5);
+		assertEquals(5,change);
+		verify(MockRecipeBook, times(3)).getRecipes();
+	}
+
 
 
 }
